@@ -8,11 +8,26 @@ namespace Dependency.Injection
         void Write(string message);
     }
 
-    public class ConsoleLog : ILog
+    public interface IConsole
+    {
+
+    }
+
+    public class ConsoleLog : ILog, IConsole
     {
         public void Write(string message)
         {
             Console.WriteLine(message);
+        }
+    }
+
+    public class EmailLog : ILog
+    {
+        private const string AdminEmail = "admin@mail.com";
+
+        public void Write(string message)
+        {
+            Console.WriteLine($"Email sent to {AdminEmail} : {message}.");
         }
     }
 
@@ -56,11 +71,14 @@ namespace Dependency.Injection
         static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
-            builder.RegisterType<ConsoleLog>().As<ILog>();
+            builder.RegisterType<EmailLog>()
+                .As<ILog>()
+                .As<IConsole>();
+            builder.RegisterType<ConsoleLog>().As<ILog>().PreserveExistingDefaults();
             builder.RegisterType<Engine>();
             builder.RegisterType<Car>();
 
-            IContainer container = builder.Build();
+            var container = builder.Build();
 
             var car = container.Resolve<Car>();
             car.Go();
