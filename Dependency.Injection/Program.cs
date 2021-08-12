@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Autofac;
 
 namespace Dependency.Injection
@@ -83,16 +84,23 @@ namespace Dependency.Injection
         static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
-            builder.RegisterType<ConsoleLog>().As<ILog>();
-            builder.Register(c => new Engine(c.Resolve<ILog>(), 123));
+            //builder.RegisterType<ConsoleLog>().As<ILog>();
+            //builder.Register(c => new Engine(c.Resolve<ILog>(), 123));
 
             //builder.RegisterType<Engine>();
-            builder.RegisterType<Car>();
+            //builder.RegisterType<Car>();
+
+            // IList<T> -> List<T>
+            // IList<int> -> List<int>
+            builder.RegisterGeneric(typeof(List<>)).As(typeof(IList<>));
 
             var container = builder.Build();
 
-            var car = container.Resolve<Car>();
-            car.Go();
+            var myList = container.Resolve<IList<int>>();
+            Console.WriteLine(myList.GetType());
+
+            //var car = container.Resolve<Car>();
+            //car.Go();
         }
     }
 }
