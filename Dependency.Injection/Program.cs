@@ -42,6 +42,12 @@ namespace Dependency.Injection
             this.id = new Random().Next();
         }
 
+        public Engine(ILog log, int id)
+        {
+            this.log = log;
+            this.id = id;
+        }
+
         public void Ahead(int power)
         {
             this.log.Write($"Engine [{id}] ahead {power}.");
@@ -77,14 +83,11 @@ namespace Dependency.Injection
         static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
-            //builder.RegisterType<ConsoleLog>().As<ILog>();
+            builder.RegisterType<ConsoleLog>().As<ILog>();
+            builder.Register(c => new Engine(c.Resolve<ILog>(), 123));
 
-            var log = new ConsoleLog();
-            builder.RegisterInstance(log).As<ILog>();
-
-            builder.RegisterType<Engine>();
-            builder.RegisterType<Car>()
-                .UsingConstructor(typeof(Engine));
+            //builder.RegisterType<Engine>();
+            builder.RegisterType<Car>();
 
             var container = builder.Build();
 
