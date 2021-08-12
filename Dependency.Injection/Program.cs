@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autofac;
+using Autofac.Core;
 
 namespace Dependency.Injection
 {
@@ -29,6 +30,20 @@ namespace Dependency.Injection
         public void Write(string message)
         {
             Console.WriteLine($"Email sent to {AdminEmail} : {message}.");
+        }
+    }
+
+    public class SMSLog : ILog
+    {
+        private readonly string phoneNumber;
+
+        public SMSLog(string phoneNumber)
+        {
+            this.phoneNumber = phoneNumber;
+        }
+        public void Write(string message)
+        {
+            Console.WriteLine($"SMS to {phoneNumber} : {message}");
         }
     }
 
@@ -84,23 +99,33 @@ namespace Dependency.Injection
         static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
-            //builder.RegisterType<ConsoleLog>().As<ILog>();
-            //builder.Register(c => new Engine(c.Resolve<ILog>(), 123));
 
-            //builder.RegisterType<Engine>();
-            //builder.RegisterType<Car>();
+            // Name parameter
+            //builder.RegisterType<SMSLog>().As<ILog>()
+            //    .WithParameter("phoneNumber", "+123456789");
 
-            // IList<T> -> List<T>
-            // IList<int> -> List<int>
-            builder.RegisterGeneric(typeof(List<>)).As(typeof(IList<>));
+            // Type parameter
+            //builder.RegisterType<SMSLog>().As<ILog>()
+            //    .WithParameter(new TypedParameter(typeof(string), "+12456789"));
 
-            var container = builder.Build();
+            // Resolved parameter
+            //builder.RegisterType<SMSLog>().As<ILog>()
+            //    .WithParameter(
+            //        new ResolvedParameter(
+            //            // Predicate
+            //            (pi, ctx) => pi.ParameterType == typeof(string) && pi.Name == "phoneNumber",
+            //            // Value accessor
+            //            (pi, ctx) => "+12456789"
+            //       )
+            //    );
 
-            var myList = container.Resolve<IList<int>>();
-            Console.WriteLine(myList.GetType());
+            var randon = new Random();
+            builder.Register((c, p) => new SMSLog(p.Named<string>("phoneNumber"))).As<ILog>();
 
-            //var car = container.Resolve<Car>();
-            //car.Go();
+            Console.WriteLine("About to build container...");
+            var continer = builder.Build();
+            var log = continer.Resolve<ILog>(new NamedParameter("phoneNumber", randon.Next().ToString()));
+            log.Write("Test message.");
         }
     }
 }
