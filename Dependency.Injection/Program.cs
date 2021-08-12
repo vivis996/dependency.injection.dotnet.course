@@ -56,7 +56,7 @@ namespace Dependency.Injection
         public Car(Engine engine)
         {
             this.engine = engine;
-            this.log = new EmailLog();   
+            this.log = new EmailLog();
         }
 
         public Car(Engine engine, ILog log)
@@ -77,7 +77,11 @@ namespace Dependency.Injection
         static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
-            builder.RegisterType<ConsoleLog>().As<ILog>();
+            //builder.RegisterType<ConsoleLog>().As<ILog>();
+
+            var log = new ConsoleLog();
+            builder.RegisterInstance(log).As<ILog>();
+
             builder.RegisterType<Engine>();
             builder.RegisterType<Car>()
                 .UsingConstructor(typeof(Engine));
