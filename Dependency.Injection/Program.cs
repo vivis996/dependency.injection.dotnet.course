@@ -72,7 +72,7 @@ namespace Dependency.Injection
         }
     }
 
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
@@ -90,9 +90,6 @@ namespace Dependency.Injection
 
             var car = container.Resolve<Car>();
             car.Go();
-
-            var log = container.Resolve<ILog>();
-            log.Write("Container test");
         }
     }
 }
