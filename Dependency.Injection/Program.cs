@@ -94,38 +94,54 @@ namespace Dependency.Injection
         }
     }
 
+    public class Parent
+    {
+        public override string ToString()
+        {
+            return "I'm your father";
+        }
+    }
+
+    public class Child
+    {
+        public string Name { get; set; }
+        public Parent Parent { get; set; }
+
+        public void SetParent(Parent parent)
+        {
+            this.Parent = parent;
+        }
+    }
+
     internal class Program
     {
         static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
+            builder.RegisterType<Parent>();
 
-            // Name parameter
-            //builder.RegisterType<SMSLog>().As<ILog>()
-            //    .WithParameter("phoneNumber", "+123456789");
+            //builder.RegisterType<Child>().PropertiesAutowired();
 
-            // Type parameter
-            //builder.RegisterType<SMSLog>().As<ILog>()
-            //    .WithParameter(new TypedParameter(typeof(string), "+12456789"));
+            //builder.RegisterType<Child>()
+            //    .WithProperty("Parent", new Parent());
 
-            // Resolved parameter
-            //builder.RegisterType<SMSLog>().As<ILog>()
-            //    .WithParameter(
-            //        new ResolvedParameter(
-            //            // Predicate
-            //            (pi, ctx) => pi.ParameterType == typeof(string) && pi.Name == "phoneNumber",
-            //            // Value accessor
-            //            (pi, ctx) => "+12456789"
-            //       )
-            //    );
+            //builder.Register(c =>
+            //{
+            //    var child = new Child();
+            //    child.SetParent(c.Resolve<Parent>());
+            //    return child;
+            //});
 
-            var randon = new Random();
-            builder.Register((c, p) => new SMSLog(p.Named<string>("phoneNumber"))).As<ILog>();
+            builder.RegisterType<Child>()
+                .OnActivated(e =>
+                {
+                    var p = e.Context.Resolve<Parent>();
+                    e.Instance.SetParent(p);
+                });
 
-            Console.WriteLine("About to build container...");
-            var continer = builder.Build();
-            var log = continer.Resolve<ILog>(new NamedParameter("phoneNumber", randon.Next().ToString()));
-            log.Write("Test message.");
+            var container = builder.Build();
+            var parent = container.Resolve<Child>().Parent;
+            Console.WriteLine(parent);
         }
     }
 }
