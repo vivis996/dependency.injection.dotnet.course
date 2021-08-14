@@ -1,4 +1,5 @@
 ﻿using System;
+using Autofac;
 
 namespace Dependency.Injection
 {
@@ -110,10 +111,25 @@ namespace Dependency.Injection
         }
     }
 
+    public class ParentChildModule : Module
+    {
+        protected override void Load(ContainerBuilder builder)
+        {
+            builder.RegisterType<Parent>();
+            builder.Register(c => new Child { Parent = c.Resolve<Parent>() });
+        }
+    }
+
     internal class Program
     {
         static void Main(string[] args)
         {
+            var builder = new ContainerBuilder();
+            builder.RegisterAssemblyModules(typeof(Program).Assembly);
+            builder.RegisterAssemblyModules<ParentChildModule>(typeof(Program).Assembly);
+
+            var continer = builder.Build();
+            Console.WriteLine(continer.Resolve<Child>().Parent);
         }
     }
 }
