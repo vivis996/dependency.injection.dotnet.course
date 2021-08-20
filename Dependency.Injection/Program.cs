@@ -3,7 +3,7 @@ using Autofac;
 
 namespace Dependency.Injection
 {
-    public interface ILog
+    public interface ILog : IDisposable
     {
         void Write(string message);
     }
@@ -15,9 +15,19 @@ namespace Dependency.Injection
 
     public class ConsoleLog : ILog, IConsole
     {
+        public ConsoleLog()
+        {
+            Console.WriteLine($"Console log created at {DateTime.Now.Ticks}.");
+        }
+
         public void Write(string message)
         {
             Console.WriteLine(message);
+        }
+
+        public void Dispose()
+        {
+            Console.WriteLine($"Console logger no longer required.");
         }
     }
 
@@ -29,6 +39,11 @@ namespace Dependency.Injection
         {
             Console.WriteLine($"Email sent to {AdminEmail} : {message}.");
         }
+
+        public void Dispose()
+        {
+            Console.WriteLine($"Email logger no longer required.");
+        }
     }
 
     public class SMSLog : ILog
@@ -39,9 +54,15 @@ namespace Dependency.Injection
         {
             this.phoneNumber = phoneNumber;
         }
+
         public void Write(string message)
         {
             Console.WriteLine($"SMS to {phoneNumber} : {message}");
+        }
+
+        public void Dispose()
+        {
+            Console.WriteLine($"SMS logger no longer required.");
         }
     }
 
@@ -120,16 +141,33 @@ namespace Dependency.Injection
         }
     }
 
+    public class Reporting
+    {
+        private Lazy<ConsoleLog> log;
+
+        public Reporting(Lazy<ConsoleLog> log)
+        {
+            this.log = log;
+            Console.WriteLine("Reporting component was created");
+        }
+
+        public void Report()
+        {
+            this.log.Value.Write("Log started");
+        }
+    }
+
     internal class Program
     {
         static void Main(string[] args)
         {
             var builder = new ContainerBuilder();
-            builder.RegisterAssemblyModules(typeof(Program).Assembly);
-            builder.RegisterAssemblyModules<ParentChildModule>(typeof(Program).Assembly);
-
-            var continer = builder.Build();
-            Console.WriteLine(continer.Resolve<Child>().Parent);
+            builder.RegisterType<ConsoleLog>();
+            builder.RegisterType<Reporting>();
+            using (var c = builder.Build())
+            {
+                c.Resolve<Reporting>().Report();
+            }
         }
     }
 }
