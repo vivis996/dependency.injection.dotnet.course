@@ -1,4 +1,4 @@
-using Autofac;
+﻿using Autofac;
 using Autofac.Features.OwnedInstances;
 
 namespace Dependency.Injection;
@@ -68,6 +68,18 @@ public class SMSLog : ILog
 
 public class Reporting
 {
+    private readonly Func<ConsoleLog> _consoleLog;
+
+    public Reporting(Func<ConsoleLog> consoleLog)
+    {
+        this._consoleLog = consoleLog;
+    }
+
+    public void Report()
+    {
+        this._consoleLog().Write("Reporting to console");
+        this._consoleLog().Write("And Again");
+    }
 }
 
 internal class Program
@@ -79,7 +91,7 @@ internal class Program
         builder.RegisterType<Reporting>();
         using (var c = builder.Build())
         {
-            c.Resolve<Reporting>().ReportOnce();
+            c.Resolve<Reporting>().Report();
         }
     }
 }
