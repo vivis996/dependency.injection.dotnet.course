@@ -1,5 +1,5 @@
-﻿using Autofac;
-using Autofac.Features.OwnedInstances;
+﻿using System.Collections.Generic;
+using Autofac;
 
 namespace Dependency.Injection;
 
@@ -68,6 +68,20 @@ public class SMSLog : ILog
 
 public class Reporting
 {
+    private readonly IList<ILog> _allLogs;
+
+    public Reporting(IList<ILog> allLogs)
+    {
+        this._allLogs = allLogs;
+    }
+
+    public void Report()
+    {
+        foreach (var log in this._allLogs)
+        {
+            log.Write($"Hello, this is {log.GetType().Name}");
+        }
+    }
 }
 
 internal class Program
@@ -75,8 +89,8 @@ internal class Program
     static void Main(string[] args)
     {
         var builder = new ContainerBuilder();
-        builder.RegisterType<ConsoleLog>();
-        builder.RegisterType<SMSLog>();
+        builder.RegisterType<ConsoleLog>().As<ILog>();
+        builder.Register(c => new SMSLog("+123")).As<ILog>();
         builder.RegisterType<Reporting>();
         using (var c = builder.Build())
         {
