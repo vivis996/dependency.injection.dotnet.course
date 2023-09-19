@@ -68,20 +68,6 @@ public class SMSLog : ILog
 
 public class Reporting
 {
-    private readonly IList<ILog> _allLogs;
-
-    public Reporting(IList<ILog> allLogs)
-    {
-        this._allLogs = allLogs;
-    }
-
-    public void Report()
-    {
-        foreach (var log in this._allLogs)
-        {
-            log.Write($"Hello, this is {log.GetType().Name}");
-        }
-    }
 }
 
 internal class Program
