@@ -1,4 +1,5 @@
 using Autofac;
+using Autofac.Features.Indexed;
 using Autofac.Features.Metadata;
 
 namespace Dependency.Injection;
@@ -75,6 +76,17 @@ public class Settings
 
 public class Reporting
 {
+    private readonly IIndex<string, ILog> _logs;
+
+    public Reporting(IIndex<string, ILog> logs)
+    {
+        this._logs = logs;
+    }
+
+    public void Report()
+    {
+        this._logs["sms"].Write("Starting report output");
+    }
 }
 
 internal class Program
@@ -82,5 +94,15 @@ internal class Program
     static void Main(string[] args)
     {
         var builder = new ContainerBuilder();
+        builder.RegisterType<ConsoleLog>()
+               .Keyed<ILog>("cmd");
+        builder.Register(c => new SMSLog("+123"))
+               .Keyed<ILog>("sms");
+        builder.RegisterType<Reporting>();
+
+        using (var c = builder.Build())
+        {
+            c.Resolve<Reporting>().Report();
+        }
     }
 }
