@@ -68,22 +68,6 @@ public class SMSLog : ILog
 
 public class Reporting
 {
-    private readonly Func<ConsoleLog> _consoleLog;
-    private readonly Func<string, SMSLog> _smsLog;
-
-    public Reporting(Func<ConsoleLog> consoleLog, Func<string, SMSLog> smsLog)
-    {
-        this._consoleLog = consoleLog;
-        this._smsLog = smsLog;
-    }
-
-    public void Report()
-    {
-        this._consoleLog().Write("Reporting to console");
-        this._consoleLog().Write("And Again");
-
-        this._smsLog("123456").Write("Texting admins...");
-    }
 }
 
 internal class Program
