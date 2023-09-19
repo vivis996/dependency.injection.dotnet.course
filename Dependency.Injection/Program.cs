@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Autofac;
+﻿using Autofac;
+using Autofac.Features.Metadata;
 
 namespace Dependency.Injection;
 
@@ -66,8 +66,31 @@ public class SMSLog : ILog
     }
 }
 
+public class Settings
+{
+    public string LogMode { get; set; }
+
+    //
+}
+
 public class Reporting
 {
+    private readonly Meta<ConsoleLog, Settings> _log;
+
+    public Reporting(Meta<ConsoleLog, Settings> log)
+    {
+        this._log = log;
+    }
+
+    public void Report()
+    {
+        this._log.Value.Write("Starting report");
+
+        if (this._log.Metadata.LogMode == "verbose")
+        {
+            this._log.Value.Write($"VERBOSE MODEL: Logger started on {DateTime.Now}");
+        }
+    }
 }
 
 internal class Program
@@ -75,8 +98,9 @@ internal class Program
     static void Main(string[] args)
     {
         var builder = new ContainerBuilder();
-        builder.RegisterType<ConsoleLog>().As<ILog>();
-        builder.Register(c => new SMSLog("+123")).As<ILog>();
+        //builder.RegisterType<ConsoleLog>().WithMetadata("mode", "verbose");
+        builder.RegisterType<ConsoleLog>()
+               .WithMetadata<Settings>(c => c.For(x => x.LogMode, "verbose"));
         builder.RegisterType<Reporting>();
         using (var c = builder.Build())
         {
