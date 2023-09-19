@@ -1,4 +1,4 @@
-﻿using Autofac;
+using Autofac;
 using Autofac.Features.OwnedInstances;
 
 namespace Dependency.Injection;
@@ -68,19 +68,6 @@ public class SMSLog : ILog
 
 public class Reporting
 {
-    private Owned<ConsoleLog> log;
-
-    public Reporting(Owned<ConsoleLog> log)
-    {
-        this.log = log;
-        Console.WriteLine("Reporting initialized");
-    }
-
-    public void ReportOnce()
-    {
-        log.Value.Write("Log started");
-        log.Dispose();
-    }
 }
 
 internal class Program
@@ -93,7 +80,6 @@ internal class Program
         using (var c = builder.Build())
         {
             c.Resolve<Reporting>().ReportOnce();
-            Console.WriteLine("Done reporting");
         }
     }
 }
