@@ -167,5 +167,21 @@ internal class Program
 {
     static void Main(string[] args)
     {
+        var builder = new ContainerBuilder();
+        //builder.RegisterType<ConsoleLog>()
+               // To exceute Dispose method manually
+               //.ExternallyOwned();
+        // This no will execute Dispose method by default
+        builder.RegisterInstance(new ConsoleLog());
+
+        // This will no execute Dispose method
+        //var container = builder.Build();
+
+        // This way will execute it, not matter what
+        using (var container = builder.Build())
+        using (var scope = container.BeginLifetimeScope())
+        {
+            scope.Resolve<ConsoleLog>();
+        }
     }
 }
