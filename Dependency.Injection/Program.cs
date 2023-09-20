@@ -186,44 +186,5 @@ internal class Program
     static void Main(string[] args)
     {
         var builder = new ContainerBuilder();
-        builder.RegisterType<Parent>();
-        builder.RegisterType<Child>()
-               .OnActivating(a =>
-               {
-                   Console.WriteLine("Child activating");
-                   //a.Instance.Parent = a.Context.Resolve<Parent>();
-                   a.ReplaceInstance(new BadChild());
-               })
-               .OnActivated(a =>
-               {
-                   Console.WriteLine("Child activated");
-               })
-               .OnRelease(a =>
-               {
-                   Console.WriteLine("Child about to be removed");
-               });
-
-        // Not work
-        //builder.RegisterType<ConsoleLog>()
-        //       .As<ILog>()
-        //       .OnActivating(a =>
-        //       {
-        //           a.ReplaceInstance(new SMSLog("+123"));
-        //       });
-
-        builder.RegisterType<ConsoleLog>().AsSelf();
-        builder.Register<ILog>(c => c.Resolve<ConsoleLog>())
-               .OnActivating(a => a.ReplaceInstance(new SMSLog("+123")));
-
-        using (var scope = builder.Build().BeginLifetimeScope())
-        {
-            var child = scope.Resolve<Child>();
-            var parent = child.Parent;
-            Console.WriteLine(child);
-            Console.WriteLine(parent);
-
-            var log = scope.Resolve<ILog>();
-            log.Write("Testing");
-        }
     }
 }
