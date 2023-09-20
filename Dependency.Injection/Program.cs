@@ -94,15 +94,5 @@ internal class Program
     static void Main(string[] args)
     {
         var builder = new ContainerBuilder();
-        builder.RegisterType<ConsoleLog>()
-               .Keyed<ILog>("cmd");
-        builder.Register(c => new SMSLog("+123"))
-               .Keyed<ILog>("sms");
-        builder.RegisterType<Reporting>();
-
-        using (var c = builder.Build())
-        {
-            c.Resolve<Reporting>().Report();
-        }
     }
 }
