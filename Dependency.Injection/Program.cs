@@ -181,10 +181,29 @@ public class ParentChildModule : Module
     }
 }
 
+public class MyClass : IStartable
+{
+    public MyClass()
+    {
+        Console.WriteLine("MyClass ctor");
+    }
+
+    public void Start()
+    {
+        Console.WriteLine("Container being built");
+    }
+}
+
 internal class Program
 {
     static void Main(string[] args)
     {
         var builder = new ContainerBuilder();
+        builder.RegisterType<MyClass>()
+               .AsSelf()
+               .As<IStartable>()
+               .SingleInstance();
+        var container = builder.Build();
+        container.Resolve<MyClass>();
     }
 }
