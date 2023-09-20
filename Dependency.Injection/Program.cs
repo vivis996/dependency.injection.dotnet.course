@@ -1,36 +1,165 @@
-using System.Collections.Generic;
 using Autofac;
+using Autofac.Features.Indexed;
 
 namespace Dependency.Injection;
 
-public interface IResource
+public interface ILog : IDisposable
 {
+    void Write(string message);
 }
 
-public class SingletonResource : IResource
+public interface IConsole
 {
+
 }
 
-public class InstancePerDependencyResource : IResource, IDisposable
+public class ConsoleLog : ILog, IConsole
 {
-    public InstancePerDependencyResource()
+    public ConsoleLog()
     {
-        Console.WriteLine("Instance per dep created");
+        Console.WriteLine($"Console log created at {DateTime.Now.Ticks}.");
+    }
+
+    public void Write(string message)
+    {
+        Console.WriteLine(message);
     }
 
     public void Dispose()
     {
-        Console.WriteLine("Instance per dep destroyed");
+        Console.WriteLine($"Console logger no longer required.");
     }
 }
 
-public class ResourceManager
+public class EmailLog : ILog
 {
-    public IEnumerable<IResource> Resources { get; set; }
+    private const string AdminEmail = "admin@mail.com";
 
-    public ResourceManager(IEnumerable<IResource> resources)
+    public void Write(string message)
     {
-        Resources = resources;
+        Console.WriteLine($"Email sent to {AdminEmail} : {message}.");
+    }
+
+    public void Dispose()
+    {
+        Console.WriteLine($"Email logger no longer required.");
+    }
+}
+
+public class SMSLog : ILog
+{
+    private readonly string phoneNumber;
+
+    public SMSLog(string phoneNumber)
+    {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void Write(string message)
+    {
+        Console.WriteLine($"SMS to {phoneNumber} : {message}");
+    }
+
+    public void Dispose()
+    {
+        Console.WriteLine($"SMS logger no longer required.");
+    }
+}
+
+public class Settings
+{
+    public string LogMode { get; set; }
+
+    //
+}
+
+public class Reporting
+{
+    private readonly IIndex<string, ILog> _logs;
+
+    public Reporting(IIndex<string, ILog> logs)
+    {
+        this._logs = logs;
+    }
+
+    public void Report()
+    {
+        this._logs["sms"].Write("Starting report output");
+    }
+}
+
+public class Engine
+{
+    private readonly ILog _log;
+    private readonly int _id;
+
+    public Engine(ILog log)
+    {
+        this._log = log;
+        this._id = new Random().Next();
+    }
+
+    public Engine(ILog log, int id)
+    {
+        this._log = log;
+        this._id = id;
+    }
+
+    public void Ahead(int power)
+    {
+        this._log.Write($"Engine [{this._id}] ahead {power}");
+    }
+}
+
+public class Car
+{
+    private readonly Engine _engine;
+    private readonly ILog _log;
+
+    public Car(Engine engine)
+    {
+        this._engine = engine;
+        this._log = new EmailLog();
+    }
+
+    public Car(Engine engine, ILog log)
+    {
+        this._engine = engine;
+        this._log = log;
+    }
+
+    public void Go()
+    {
+        _engine.Ahead(100);
+        _log.Write("Car going forward...");
+    }
+}
+
+public class Parent
+{
+    public override string ToString()
+    {
+        return "I am your father";
+    }
+}
+
+public class Child
+{
+    public string Name { get; set; }
+    public Parent Parent { get; set; }
+
+    public void SetParent(Parent parent)
+    {
+        this.Parent = parent;
+    }
+}
+
+public class ParentChildModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
+    {
+        builder.RegisterType<Parent>();
+        builder.Register(c => new Child() { Parent = c.Resolve<Parent>() });
     }
 }
 
@@ -38,18 +167,5 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        var builder = new ContainerBuilder();
-        builder.RegisterType<ResourceManager>().SingleInstance();
-        builder.RegisterType<SingletonResource>()
-               .As<IResource>()
-               .SingleInstance();
-        builder.RegisterType<InstancePerDependencyResource>()
-               .As<IResource>();
-
-        using (var container = builder.Build())
-        using(var scope = container.BeginLifetimeScope())
-        {
-            scope.Resolve<ResourceManager>();
-        }
     }
 }
