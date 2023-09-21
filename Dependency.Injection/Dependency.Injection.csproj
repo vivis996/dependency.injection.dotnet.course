@@ -10,8 +10,23 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Autofac" />
+    <None Remove="config.json" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Autofac" Version="7.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="7.0.0" />
+    <PackageReference Include="Autofac.Configuration" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" Version="7.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

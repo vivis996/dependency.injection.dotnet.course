@@ -1,0 +1,21 @@
+﻿{
+  "defaultAssembly": "Dependency.Injection",
+  "components": [
+    {
+      "type": "Dependency.Injection.Addition",
+      "services": [
+        {
+          "type": "Dependency.Injection.IOperation",
+        }
+      ],
+    },
+    {
+      "type": "Dependency.Injection.Multiplication",
+      "services": [
+        {
+          "type": "Dependency.Injection.IOperation",
+        }
+      ],
+    },
+  ]
+}
