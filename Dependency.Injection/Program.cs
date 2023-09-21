@@ -27,6 +27,15 @@ public class Multiplication : IOperation
     }
 }
 
+public class CalculationModule : Module
+{
+    protected override void Load(ContainerBuilder builder)
+    {
+        builder.RegisterType<Addition>().As<IOperation>();
+        builder.RegisterType<Multiplication>().As<IOperation>();
+    }
+}
+
 internal class Program
 {
     static void Main(string[] args)

@@ -1,3 +1,8 @@
 ﻿{
   "defaultAssembly": "Dependency.Injection",
+  "modules": [
+    {
+      "type": "Dependency.Injection.CalculationModule",
+    },
+  ],
 }
